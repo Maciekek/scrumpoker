@@ -19,6 +19,7 @@ export default function Room({
   onReset,
   onKick,
   onChangeName,
+  onToggleAdmin,
   onToggleSpectator,
   onLeave,
 }) {
@@ -51,6 +52,7 @@ export default function Room({
         isAdmin={isAdmin}
         isSpectator={isSpectator}
         onChangeName={onChangeName}
+        onToggleAdmin={onToggleAdmin}
         onToggleSpectator={onToggleSpectator}
         onLeave={onLeave}
       />

@@ -34,6 +34,7 @@ export default function App() {
       onReset={s.reset}
       onKick={s.kick}
       onChangeName={s.changeName}
+      onToggleAdmin={s.toggleAdmin}
       onToggleSpectator={s.toggleSpectator}
       onLeave={s.leaveRoom}
     />

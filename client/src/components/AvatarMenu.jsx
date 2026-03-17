@@ -4,8 +4,10 @@ import { useTranslation } from "../i18n";
 
 export default function AvatarMenu({
   userName,
+  isAdmin,
   isSpectator,
   onChangeName,
+  onToggleAdmin,
   onToggleSpectator,
   onLeave,
 }) {
@@ -85,6 +87,11 @@ export default function AvatarMenu({
               >
                 {t("changeName")}
               </button>
+              <Toggle
+                on={isAdmin}
+                label={t("adminToggle")}
+                onClick={onToggleAdmin}
+              />
               <Toggle
                 on={isSpectator}
                 label={t("spectator")}

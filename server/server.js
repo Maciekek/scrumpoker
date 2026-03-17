@@ -120,6 +120,20 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
   });
 
+  socket.on("toggle-admin", ({ roomCode }, callback) => {
+    const room = rooms.get(roomCode);
+    if (!room) return;
+    const participant = room.participants.find((p) => p.id === socket.id);
+    if (!participant) return;
+    if (participant.role === "spectator") {
+      participant.prevRole = participant.prevRole === "admin" ? "participant" : "admin";
+    } else {
+      participant.role = participant.role === "admin" ? "participant" : "admin";
+    }
+    if (callback) callback({ success: true });
+    io.to(roomCode).emit("room-update", getRoomState(roomCode));
+  });
+
   socket.on("toggle-spectator", ({ roomCode }, callback) => {
     const room = rooms.get(roomCode);
     if (!room) return;

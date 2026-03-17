@@ -9,6 +9,7 @@ export default function RoomHeader({
   isAdmin,
   isSpectator,
   onChangeName,
+  onToggleAdmin,
   onToggleSpectator,
   onLeave,
 }) {
@@ -26,19 +27,19 @@ export default function RoomHeader({
     <div className="room-header">
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span className="room-code">{roomCode}</span>
-        {isAdmin && (
-          <button
-            className={`btn-small ${linkCopied ? "link-copied" : ""}`}
-            onClick={handleCopyLink}
-          >
-            {linkCopied ? t("copied") : t("copyLink")}
-          </button>
-        )}
+        <button
+          className={`btn-small ${linkCopied ? "link-copied" : ""}`}
+          onClick={handleCopyLink}
+        >
+          {linkCopied ? t("copied") : t("copyLink")}
+        </button>
       </div>
       <AvatarMenu
         userName={userName}
+        isAdmin={isAdmin}
         isSpectator={isSpectator}
         onChangeName={onChangeName}
+        onToggleAdmin={onToggleAdmin}
         onToggleSpectator={onToggleSpectator}
         onLeave={onLeave}
       />

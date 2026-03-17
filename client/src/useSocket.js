@@ -127,6 +127,10 @@ export function useSocket() {
     emit("reset", { roomCode });
   }, [roomCode, emit]);
 
+  const toggleAdmin = useCallback(() => {
+    emit("toggle-admin", { roomCode });
+  }, [roomCode, emit]);
+
   const toggleSpectator = useCallback(() => {
     emit("toggle-spectator", { roomCode }, (res) => {
       if (res?.success) {
@@ -188,6 +192,7 @@ export function useSocket() {
     vote,
     reveal,
     reset,
+    toggleAdmin,
     toggleSpectator,
     kick,
     leaveRoom,

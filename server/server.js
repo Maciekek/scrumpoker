@@ -29,7 +29,6 @@ function getRoomState(roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return null;
   const participants = room.participants
-    .filter((p) => !p.disconnected)
     .map((p) => ({
       id: p.id,
       name: p.name,

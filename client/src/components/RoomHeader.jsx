@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import AvatarMenu from "./AvatarMenu";
+import QRModal from "./QRModal";
 import { copyToClipboard } from "../clipboard";
 import { useTranslation } from "../i18n";
 
@@ -14,6 +15,7 @@ export default function RoomHeader({
   onLeave,
 }) {
   const [linkCopied, setLinkCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const { t } = useTranslation();
 
   const handleCopyLink = useCallback(() => {
@@ -33,7 +35,11 @@ export default function RoomHeader({
         >
           {linkCopied ? t("copied") : t("copyLink")}
         </button>
+        <button className="btn-small" onClick={() => setShowQR(true)}>
+          {t("qrCode")}
+        </button>
       </div>
+      {showQR && <QRModal onClose={() => setShowQR(false)} />}
       <AvatarMenu
         userName={userName}
         isAdmin={isAdmin}

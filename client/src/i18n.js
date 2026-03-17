@@ -28,6 +28,8 @@ const translations = {
     enterYourName: "Enter your name",
     enterRoomCode: "Enter room code",
     kickedByAdmin: "You have been removed from the room by the admin",
+    qrCode: "QR",
+    scanToJoin: "Scan to join",
   },
   pl: {
     yourName: "Twoje imię",
@@ -60,6 +62,8 @@ const translations = {
     enterYourName: "Podaj swoje imię",
     enterRoomCode: "Podaj kod pokoju",
     kickedByAdmin: "Zostałeś usunięty z pokoju przez admina",
+    qrCode: "QR",
+    scanToJoin: "Zeskanuj, aby dołączyć",
   },
 };
 

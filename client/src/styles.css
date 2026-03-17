@@ -460,3 +460,63 @@ body {
   color: #10b981;
   border-color: #10b981;
 }
+
+/* ── QR Modal ── */
+
+.qr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.qr-card {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 36px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  max-width: 360px;
+  width: 90%;
+}
+
+.qr-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.qr-close:hover {
+  color: #374151;
+}
+
+.qr-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.qr-image {
+  border-radius: 8px;
+}
+
+.qr-url {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #6b7280;
+  word-break: break-all;
+  text-align: center;
+}

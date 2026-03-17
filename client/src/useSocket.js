@@ -28,6 +28,11 @@ export function useSocket() {
         }
         return state;
       });
+
+      const me = state.participants.find((p) => p.id === socket.id);
+      if (me && !me.hasVoted) {
+        setSelectedVote(null);
+      }
     });
 
     socket.on("kicked", () => {

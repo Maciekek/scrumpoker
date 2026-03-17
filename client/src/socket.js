@@ -1,0 +1,15 @@
+import { io } from "socket.io-client";
+
+export function createSocket() {
+  return io({
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 30000,
+  });
+}
+
+export function getRoomCodeFromURL() {
+  const path = window.location.pathname.replace(/^\//, "").toUpperCase().trim();
+  return /^[A-Z0-9]{6}$/.test(path) ? path : "";
+}

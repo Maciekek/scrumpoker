@@ -1,0 +1,12 @@
+{
+  "name": "scrumpoker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "prod": "npm run install:all && npm run build && cd server && node server.js",
+    "dev:server": "cd server && node server.js",
+    "dev:client": "cd client && npm run dev"
+  }
+}

@@ -220,6 +220,24 @@ app.get("*", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, "::", () => {
+const HOST = process.env.HOST || "::";
+let fallbackTried = false;
+
+server.on("error", (err) => {
+  const canFallbackToIPv4 =
+    !fallbackTried && HOST === "::" && (err.code === "EADDRNOTAVAIL" || err.code === "EPERM");
+
+  if (canFallbackToIPv4) {
+    fallbackTried = true;
+    console.warn("IPv6 bind failed, retrying on IPv4 0.0.0.0");
+    server.listen(PORT, "0.0.0.0");
+    return;
+  }
+
+  console.error("Failed to start server:", err);
+  process.exit(1);
+});
+
+server.listen(PORT, HOST, () => {
   console.log(`Scrum Poker running on http://localhost:${PORT}`);
 });

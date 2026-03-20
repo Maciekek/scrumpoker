@@ -57,6 +57,7 @@ export function useSocket() {
             setRole(res.role);
             setScreen("room");
             setJoinCode(code);
+            if (res.vote != null) setSelectedVote(res.vote);
           }
         });
       } else {
@@ -110,6 +111,7 @@ export function useSocket() {
         setRole(res.role);
         setScreen("room");
         window.history.replaceState({}, "", `/${res.roomCode}`);
+        if (res.vote != null) setSelectedVote(res.vote);
       } else {
         setError(res.error);
       }

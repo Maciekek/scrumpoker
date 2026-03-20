@@ -97,7 +97,8 @@ io.on("connection", (socket) => {
     }
     currentRoom = code;
     socket.join(code);
-    callback({ success: true, roomCode: code, role });
+    const vote = existing ? existing.vote : null;
+    callback({ success: true, roomCode: code, role, vote });
     io.to(code).emit("room-update", getRoomState(code));
   });
 

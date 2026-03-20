@@ -10,6 +10,8 @@ export function createSocket() {
 }
 
 export function getRoomCodeFromURL() {
-  const path = window.location.pathname.replace(/^\//, "").toLowerCase().trim();
-  return /^[a-z]+-[a-z]+(-\d+)?$/.test(path) ? path : "";
+  const path = window.location.pathname.toLowerCase().trim();
+  const code = path.replace(/^\/+|\/+$/g, "");
+  if (!code || code.includes("/")) return "";
+  return /^[a-z0-9][a-z0-9-]{1,63}$/.test(code) ? code : "";
 }

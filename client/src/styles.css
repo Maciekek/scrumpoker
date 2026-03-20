@@ -82,9 +82,17 @@ body {
   border-radius: 10px;
   font-size: 15px;
   outline: none;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   transition: border-color 0.15s;
   color: #1f2937;
+}
+
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
 }
 
 .btn-primary {

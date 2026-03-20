@@ -63,6 +63,11 @@ export function useSocket() {
     });
   }, [emit]);
 
+  useEffect(() => {
+    if (joinCode || roomNameInput) return;
+    suggestRoomName();
+  }, [joinCode, roomNameInput, suggestRoomName]);
+
   const createRoom = useCallback(() => {
     const name = userName.trim();
     if (!name) { setError(t("enterYourName")); return; }

@@ -40,7 +40,11 @@ export default function Lobby({
             <strong style={{ color: "#111827" }}>{joinCode}</strong>
           </div>
         )}
+        <label className="input-label" htmlFor="user-name-input">
+          {t("yourName")}
+        </label>
         <input
+          id="user-name-input"
           className="input"
           placeholder={t("yourName")}
           value={userName}
@@ -48,13 +52,19 @@ export default function Lobby({
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         />
         {!hasInviteCode && (
-          <input
-            className="input"
-            placeholder={t("roomName")}
-            value={roomNameInput || ""}
-            onChange={(e) => onRoomNameChange(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
+          <>
+            <label className="input-label" htmlFor="room-name-input">
+              {t("roomName")}
+            </label>
+            <input
+              id="room-name-input"
+              className="input"
+              placeholder={t("roomName")}
+              value={roomNameInput || ""}
+              onChange={(e) => onRoomNameChange(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            />
+          </>
         )}
         <button className="btn-primary" onClick={handleSubmit}>
           {hasInviteCode ? t("joinRoom") : t("createRoom")}

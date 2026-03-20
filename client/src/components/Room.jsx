@@ -42,6 +42,7 @@ export default function Room({
 
   const participants = roomState?.participants || [];
   const revealed = roomState?.revealed || false;
+  const hasAnyEstimation = participants.some((p) => p.hasVoted);
 
   return (
     <div className="app room-layout">
@@ -65,7 +66,11 @@ export default function Room({
           {isAdmin && (
             <div className="admin-actions">
               {!revealed ? (
-                <button className="btn-primary" onClick={onReveal}>
+                <button
+                  className="btn-primary"
+                  onClick={onReveal}
+                  disabled={!hasAnyEstimation}
+                >
                   {t("revealCards")}
                 </button>
               ) : (

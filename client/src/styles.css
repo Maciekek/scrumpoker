@@ -112,6 +112,11 @@ body {
   background: #374151;
 }
 
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
 .btn-secondary {
   width: 100%;
   padding: 10px;

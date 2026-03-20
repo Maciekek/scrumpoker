@@ -452,6 +452,12 @@ body {
   margin-left: 8px;
 }
 
+.vote-history {
+  font-weight: 400;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
 .admin-actions {
   margin-bottom: 24px;
 }

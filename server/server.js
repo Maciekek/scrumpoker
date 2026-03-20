@@ -45,6 +45,7 @@ function getRoomState(roomCode) {
       isAdmin: isAdmin(p),
       hasVoted: p.vote !== null,
       vote: room.revealed ? p.vote : null,
+      voteHistory: room.revealed ? (p.voteHistory || []) : [],
     }));
   return {
     roomCode,
@@ -148,6 +149,10 @@ io.on("connection", (socket) => {
     if (!room) return;
     const participant = findBySocket(room.participants, socket.id);
     if (!participant || participant.role === "spectator") return;
+    if (room.revealed && participant.vote !== null && participant.vote !== value) {
+      if (!participant.voteHistory) participant.voteHistory = [];
+      participant.voteHistory.push(participant.vote);
+    }
     participant.vote = value;
     for (const sid of participant.sockets) {
       io.to(sid).emit("sync-vote", value);
@@ -170,7 +175,7 @@ io.on("connection", (socket) => {
     const requester = findBySocket(room.participants, socket.id);
     if (!requester || !isAdmin(requester)) return;
     room.revealed = false;
-    room.participants.forEach((p) => (p.vote = null));
+    room.participants.forEach((p) => { p.vote = null; delete p.voteHistory; });
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
   });
 

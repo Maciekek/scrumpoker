@@ -30,7 +30,14 @@ export default function ParticipantList({
                 <span className="badge badge--spectator">{t("spectatorBadge")}</span>
               )}
               {revealed && p.vote !== null && (
-                <span className="revealed-vote">{p.vote}</span>
+                <span className="revealed-vote">
+                  {p.voteHistory?.length > 0 && (
+                    <span className="vote-history">
+                      {p.voteHistory.join(" → ")} →{" "}
+                    </span>
+                  )}
+                  {p.vote}
+                </span>
               )}
             </div>
             {isAdmin && p.name !== myName && (

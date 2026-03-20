@@ -4,7 +4,7 @@ export function createSocket() {
   return io({
     reconnection: true,
     reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
+    reconnectionDelay: 500,
     reconnectionDelayMax: 30000,
   });
 }

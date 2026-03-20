@@ -33,6 +33,7 @@ export function useSocket() {
   const [error, setError] = useState("");
   const [kickedMessage, setKickedMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
+  const autoJoinKeyRef = useRef("");
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -129,6 +130,19 @@ export function useSocket() {
       }
     });
   }, [userName, joinCode, emit]);
+
+  useEffect(() => {
+    if (!isConnected || screen !== "lobby") return;
+
+    const name = userName.trim();
+    const code = joinCode.trim();
+    if (!name || !code) return;
+
+    const key = `${code}::${name}`;
+    if (autoJoinKeyRef.current === key) return;
+    autoJoinKeyRef.current = key;
+    joinRoom();
+  }, [isConnected, screen, userName, joinCode, joinRoom]);
 
   const vote = useCallback(
     (value) => {

@@ -29,6 +29,7 @@ function getRoomState(roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return null;
   const participants = room.participants
+    .filter((p) => !p.disconnected)
     .map((p) => ({
       id: p.id,
       name: p.name,
@@ -76,21 +77,22 @@ io.on("connection", (socket) => {
       room = { participants: [], revealed: false };
       rooms.set(code, room);
     }
-    const existing = room.participants.find(
-      (p) => p.id === socket.id && !p.disconnected
-    );
-    if (existing) {
-      callback({ success: false, error: "Już jesteś w tym pokoju" });
-      return;
-    }
-    const disconnected = room.participants.find(
-      (p) => p.name === userName && p.disconnected
+    const existingByName = room.participants.find(
+      (p) => p.name === userName
     );
     let role;
-    if (disconnected) {
-      disconnected.id = socket.id;
-      disconnected.disconnected = false;
-      role = disconnected.role;
+    if (existingByName) {
+      const oldId = existingByName.id;
+      existingByName.id = socket.id;
+      existingByName.disconnected = false;
+      role = existingByName.role;
+      if (oldId !== socket.id) {
+        const oldSocket = io.sockets.sockets.get(oldId);
+        if (oldSocket) {
+          oldSocket.leave(code);
+          oldSocket.disconnect(true);
+        }
+      }
     } else {
       const hasAdmin = room.participants.some(
         (p) => isAdmin(p)

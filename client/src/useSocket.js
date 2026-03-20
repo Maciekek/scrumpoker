@@ -47,7 +47,6 @@ export function useSocket() {
 
     socket.on("connect", () => {
     });
-    });
 
     return () => socket.disconnect();
   }, []);

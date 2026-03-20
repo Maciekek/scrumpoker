@@ -16,6 +16,7 @@ export function useSocket() {
   const [roomNameInput, setRoomNameInput] = useState("");
   const [error, setError] = useState("");
   const [kickedMessage, setKickedMessage] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -47,6 +48,11 @@ export function useSocket() {
     });
 
     socket.on("connect", () => {
+      setIsConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
     });
 
     return () => socket.disconnect();
@@ -58,15 +64,15 @@ export function useSocket() {
   );
 
   const suggestRoomName = useCallback(() => {
-    emit("suggest-room-name", (res) => {
+    emit("suggest-room-name", {}, (res) => {
       if (res?.name) setRoomNameInput(res.name);
     });
   }, [emit]);
 
   useEffect(() => {
-    if (joinCode || roomNameInput) return;
+    if (!isConnected || joinCode || roomNameInput) return;
     suggestRoomName();
-  }, [joinCode, roomNameInput, suggestRoomName]);
+  }, [isConnected, joinCode, roomNameInput, suggestRoomName]);
 
   const createRoom = useCallback(() => {
     const name = userName.trim();

@@ -34,6 +34,7 @@ export function useSocket() {
   const [kickedMessage, setKickedMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const autoJoinKeyRef = useRef("");
+  const rejoinSocketIdRef = useRef("");
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -143,6 +144,23 @@ export function useSocket() {
     autoJoinKeyRef.current = key;
     joinRoom();
   }, [isConnected, screen, userName, joinCode, joinRoom]);
+
+  useEffect(() => {
+    if (!isConnected || screen !== "room" || !roomCode || !userName.trim()) return;
+
+    const socketId = socketRef.current?.id || "";
+    if (!socketId || rejoinSocketIdRef.current === socketId) return;
+    rejoinSocketIdRef.current = socketId;
+
+    emit("join-room", { roomCode, userName: userName.trim() }, (res) => {
+      if (res?.success) {
+        setRole(res.role);
+        if (res.vote != null) setSelectedVote(res.vote);
+      } else if (res?.error) {
+        setError(res.error);
+      }
+    });
+  }, [isConnected, screen, roomCode, userName, emit]);
 
   const vote = useCallback(
     (value) => {

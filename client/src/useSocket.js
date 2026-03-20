@@ -13,6 +13,7 @@ export function useSocket() {
   const [role, setRole] = useState("");
   const [roomState, setRoomState] = useState(null);
   const [selectedVote, setSelectedVote] = useState(null);
+  const [roomNameInput, setRoomNameInput] = useState("");
   const [error, setError] = useState("");
   const [kickedMessage, setKickedMessage] = useState("");
   const socketRef = useRef(null);
@@ -56,13 +57,20 @@ export function useSocket() {
     []
   );
 
+  const suggestRoomName = useCallback(() => {
+    emit("suggest-room-name", (res) => {
+      if (res?.name) setRoomNameInput(res.name);
+    });
+  }, [emit]);
+
   const createRoom = useCallback(() => {
     const name = userName.trim();
     if (!name) { setError(t("enterYourName")); return; }
     setError("");
     setKickedMessage("");
     localStorage.setItem("scrumpoker_name", name);
-    emit("create-room", { userName: name }, (res) => {
+    const roomName = roomNameInput.trim().toLowerCase() || undefined;
+    emit("create-room", { userName: name, roomName }, (res) => {
       if (res.success) {
         setRoomCode(res.roomCode);
         setRole(res.role);
@@ -72,7 +80,7 @@ export function useSocket() {
         setError(res.error);
       }
     });
-  }, [userName, emit]);
+  }, [userName, roomNameInput, emit]);
 
   const joinRoom = useCallback(() => {
     const name = userName.trim();
@@ -168,7 +176,11 @@ export function useSocket() {
     myParticipant,
     isAdmin: myParticipant?.isAdmin || false,
     isSpectator: myParticipant?.role === "spectator",
+    joinCode,
     hasInviteCode: !!joinCode,
+    roomNameInput,
+    setRoomNameInput,
+    suggestRoomName,
     createRoom,
     joinRoom,
     vote,

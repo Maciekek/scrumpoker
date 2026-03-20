@@ -12,10 +12,14 @@ export default function App() {
         userName={s.userName}
         onUserNameChange={s.setUserName}
         hasInviteCode={s.hasInviteCode}
+        joinCode={s.joinCode}
         onJoin={s.joinRoom}
         onCreate={s.createRoom}
         error={s.error}
         kickedMessage={s.kickedMessage}
+        roomNameInput={s.roomNameInput}
+        onRoomNameChange={s.setRoomNameInput}
+        onSuggestRoomName={s.suggestRoomName}
       />
     );
   }

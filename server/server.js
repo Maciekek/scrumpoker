@@ -16,13 +16,38 @@ const io = new Server(server, {
 
 const rooms = new Map();
 
-function generateRoomCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+const ADJECTIVES = [
+  "lazy", "happy", "sneaky", "fluffy", "grumpy", "silly", "wobbly", "bouncy",
+  "sleepy", "cheeky", "clumsy", "dizzy", "fancy", "goofy", "jolly", "lucky",
+  "mighty", "nutty", "peppy", "quirky", "rowdy", "sassy", "tiny", "wacky",
+  "zany", "brave", "crispy", "dapper", "fizzy", "giggly", "hyper", "icy",
+  "jumpy", "keen", "lively", "mellow", "nifty", "odd", "plucky", "rapid",
+  "snappy", "tricky", "upbeat", "vivid", "witty", "cosmic", "funky", "golden",
+  "humble", "epic",
+];
+
+const NOUNS = [
+  "penguin", "taco", "unicorn", "waffle", "llama", "panda", "muffin", "narwhal",
+  "otter", "pretzel", "quokka", "raccoon", "sloth", "walrus", "yeti", "badger",
+  "cactus", "dingo", "falcon", "goblin", "hamster", "igloo", "jellyfish", "koala",
+  "lobster", "moose", "noodle", "octopus", "pickle", "robot", "squid", "tiger",
+  "wizard", "alpaca", "biscuit", "cupcake", "dolphin", "espresso", "flamingo",
+  "giraffe", "hedgehog", "impala", "jackrabbit", "kiwi", "lemur", "marshmallow",
+  "nugget", "owl", "platypus", "raptor",
+];
+
+function generateRoomName() {
+  const maxAttempts = 500;
+  for (let i = 0; i < maxAttempts; i++) {
+    const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+    const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    const name = `${adj}-${noun}`;
+    if (!rooms.has(name)) return name;
   }
-  return code;
+  // Fallback: append random digits
+  const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+  const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+  return `${adj}-${noun}-${Math.floor(Math.random() * 1000)}`;
 }
 
 function findBySocket(participants, socketId) {
@@ -57,8 +82,20 @@ function getRoomState(roomCode) {
 io.on("connection", (socket) => {
   let currentRoom = null;
 
-  socket.on("create-room", ({ userName }, callback) => {
-    const roomCode = generateRoomCode();
+  socket.on("suggest-room-name", (callback) => {
+    if (typeof callback === "function") {
+      callback({ name: generateRoomName() });
+    }
+  });
+
+  socket.on("create-room", ({ userName, roomName }, callback) => {
+    const roomCode = roomName && typeof roomName === "string"
+      ? roomName.toLowerCase().trim()
+      : generateRoomName();
+    if (rooms.has(roomCode)) {
+      callback({ success: false, error: "Room name already taken" });
+      return;
+    }
     rooms.set(roomCode, {
       participants: [{
         sockets: new Set([socket.id]),
@@ -75,7 +112,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-room", ({ roomCode, userName }, callback) => {
-    const code = roomCode.toUpperCase().trim();
+    const code = roomCode.toLowerCase().trim();
     let room = rooms.get(code);
     if (!room) {
       room = { participants: [], revealed: false };

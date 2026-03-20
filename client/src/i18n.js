@@ -4,6 +4,7 @@ const translations = {
   en: {
     yourName: "Your name",
     joinRoom: "Join room",
+    joiningRoom: "Joining room",
     createRoom: "Create room",
     copied: "Copied!",
     copyLink: "Copy link",
@@ -30,10 +31,12 @@ const translations = {
     kickedByAdmin: "You have been removed from the room by the admin",
     qrCode: "QR",
     scanToJoin: "Scan to join",
+    roomName: "Room name",
   },
   pl: {
     yourName: "Twoje imię",
     joinRoom: "Dołącz do pokoju",
+    joiningRoom: "Dołączasz do pokoju",
     createRoom: "Stwórz pokój",
     copied: "Skopiowano!",
     copyLink: "Kopiuj link",
@@ -64,6 +67,7 @@ const translations = {
     kickedByAdmin: "Zostałeś usunięty z pokoju przez admina",
     qrCode: "QR",
     scanToJoin: "Zeskanuj, aby dołączyć",
+    roomName: "Nazwa pokoju",
   },
 };
 

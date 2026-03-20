@@ -46,21 +46,7 @@ export function useSocket() {
     });
 
     socket.on("connect", () => {
-      const code = getRoomCodeFromURL();
-      const savedName = localStorage.getItem("scrumpoker_name");
-      if (!savedName) return;
-
-      if (code) {
-        socket.emit("join-room", { roomCode: code, userName: savedName }, (res) => {
-          if (res.success) {
-            setRoomCode(res.roomCode);
-            setRole(res.role);
-            setScreen("room");
-            setJoinCode(code);
-            if (res.vote != null) setSelectedVote(res.vote);
-          }
-        });
-      }
+    });
     });
 
     return () => socket.disconnect();

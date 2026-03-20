@@ -2,7 +2,7 @@ import { useTranslation } from "../i18n";
 
 export default function ParticipantList({
   participants,
-  myId,
+  myName,
   isAdmin,
   revealed,
   onKick,
@@ -17,8 +17,8 @@ export default function ParticipantList({
       <ul className="participant-list">
         {participants.map((p) => (
           <li
-            key={p.id}
-            className={`participant ${p.id === myId ? "participant--me" : ""}`}
+            key={p.name}
+            className={`participant ${p.name === myName ? "participant--me" : ""}`}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <span
@@ -33,10 +33,10 @@ export default function ParticipantList({
                 <span className="revealed-vote">{p.vote}</span>
               )}
             </div>
-            {isAdmin && p.id !== myId && (
+            {isAdmin && p.name !== myName && (
               <button
                 className="btn-small btn-danger"
-                onClick={() => onKick(p.id)}
+                onClick={() => onKick(p.name)}
               >
                 {t("kick")}
               </button>

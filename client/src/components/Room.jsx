@@ -13,7 +13,6 @@ export default function Room({
   selectedVote,
   isAdmin,
   isSpectator,
-  myId,
   onVote,
   onReveal,
   onReset,
@@ -83,7 +82,7 @@ export default function Room({
         <div className="col-side">
           <ParticipantList
             participants={participants}
-            myId={myId}
+            myName={userName}
             isAdmin={isAdmin}
             revealed={revealed}
             onKick={onKick}

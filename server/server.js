@@ -25,13 +25,21 @@ function generateRoomCode() {
   return code;
 }
 
+function findBySocket(participants, socketId) {
+  return participants.find((p) => p.sockets.has(socketId));
+}
+
+function isAdmin(participant) {
+  return participant.role === "admin" || participant.prevRole === "admin";
+}
+
 function getRoomState(roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return null;
   const participants = room.participants
-    .filter((p) => !p.disconnected)
+    .filter((p) => p.sockets.size > 0)
     .map((p) => ({
-      id: p.id,
+      sockets: [...p.sockets],
       name: p.name,
       role: p.role,
       isAdmin: isAdmin(p),
@@ -45,23 +53,18 @@ function getRoomState(roomCode) {
   };
 }
 
-function isAdmin(participant) {
-  return participant.role === "admin" || participant.prevRole === "admin";
-}
-
 io.on("connection", (socket) => {
   let currentRoom = null;
 
   socket.on("create-room", ({ userName }, callback) => {
     const roomCode = generateRoomCode();
-    const participant = {
-      id: socket.id,
-      name: userName,
-      role: "admin",
-      vote: null,
-    };
     rooms.set(roomCode, {
-      participants: [participant],
+      participants: [{
+        sockets: new Set([socket.id]),
+        name: userName,
+        role: "admin",
+        vote: null,
+      }],
       revealed: false,
     });
     currentRoom = roomCode;
@@ -77,29 +80,16 @@ io.on("connection", (socket) => {
       room = { participants: [], revealed: false };
       rooms.set(code, room);
     }
-    const existingByName = room.participants.find(
-      (p) => p.name === userName
-    );
+    const existing = room.participants.find((p) => p.name === userName);
     let role;
-    if (existingByName) {
-      const oldId = existingByName.id;
-      existingByName.id = socket.id;
-      existingByName.disconnected = false;
-      role = existingByName.role;
-      if (oldId !== socket.id) {
-        const oldSocket = io.sockets.sockets.get(oldId);
-        if (oldSocket) {
-          oldSocket.leave(code);
-          oldSocket.disconnect(true);
-        }
-      }
+    if (existing) {
+      existing.sockets.add(socket.id);
+      role = existing.role;
     } else {
-      const hasAdmin = room.participants.some(
-        (p) => isAdmin(p)
-      );
+      const hasAdmin = room.participants.some((p) => isAdmin(p));
       role = hasAdmin ? "participant" : "admin";
       room.participants.push({
-        id: socket.id,
+        sockets: new Set([socket.id]),
         name: userName,
         role,
         vote: null,
@@ -114,7 +104,7 @@ io.on("connection", (socket) => {
   socket.on("change-name", ({ roomCode, newName }, callback) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const participant = room.participants.find((p) => p.id === socket.id);
+    const participant = findBySocket(room.participants, socket.id);
     if (!participant) return;
     participant.name = newName;
     if (callback) callback({ success: true });
@@ -124,7 +114,7 @@ io.on("connection", (socket) => {
   socket.on("toggle-admin", ({ roomCode }, callback) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const participant = room.participants.find((p) => p.id === socket.id);
+    const participant = findBySocket(room.participants, socket.id);
     if (!participant) return;
     if (participant.role === "spectator") {
       participant.prevRole = participant.prevRole === "admin" ? "participant" : "admin";
@@ -138,7 +128,7 @@ io.on("connection", (socket) => {
   socket.on("toggle-spectator", ({ roomCode }, callback) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const participant = room.participants.find((p) => p.id === socket.id);
+    const participant = findBySocket(room.participants, socket.id);
     if (!participant) return;
     if (participant.role === "spectator") {
       participant.role = participant.prevRole || "participant";
@@ -155,16 +145,19 @@ io.on("connection", (socket) => {
   socket.on("vote", ({ roomCode, value }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const participant = room.participants.find((p) => p.id === socket.id);
+    const participant = findBySocket(room.participants, socket.id);
     if (!participant || participant.role === "spectator") return;
     participant.vote = value;
+    for (const sid of participant.sockets) {
+      io.to(sid).emit("sync-vote", value);
+    }
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
   });
 
   socket.on("reveal", ({ roomCode }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const requester = room.participants.find((p) => p.id === socket.id);
+    const requester = findBySocket(room.participants, socket.id);
     if (!requester || !isAdmin(requester)) return;
     room.revealed = true;
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
@@ -173,34 +166,39 @@ io.on("connection", (socket) => {
   socket.on("reset", ({ roomCode }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const requester = room.participants.find((p) => p.id === socket.id);
+    const requester = findBySocket(room.participants, socket.id);
     if (!requester || !isAdmin(requester)) return;
     room.revealed = false;
     room.participants.forEach((p) => (p.vote = null));
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
   });
 
-  socket.on("kick", ({ roomCode, participantId }) => {
+  socket.on("kick", ({ roomCode, participantName }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    const requester = room.participants.find((p) => p.id === socket.id);
+    const requester = findBySocket(room.participants, socket.id);
     if (!requester || !isAdmin(requester)) return;
-    if (participantId === socket.id) return;
-    room.participants = room.participants.filter(
-      (p) => p.id !== participantId
-    );
-    io.to(participantId).emit("kicked");
-    const kickedSocket = io.sockets.sockets.get(participantId);
-    if (kickedSocket) {
-      kickedSocket.leave(roomCode);
+    const target = room.participants.find((p) => p.name === participantName);
+    if (!target || target === requester) return;
+    for (const sid of target.sockets) {
+      io.to(sid).emit("kicked");
+      const s = io.sockets.sockets.get(sid);
+      if (s) s.leave(roomCode);
     }
+    room.participants = room.participants.filter((p) => p !== target);
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
   });
 
   socket.on("leave-room", ({ roomCode }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    room.participants = room.participants.filter((p) => p.id !== socket.id);
+    const participant = findBySocket(room.participants, socket.id);
+    if (!participant) return;
+    // Remove only this socket; if last socket, remove participant
+    participant.sockets.delete(socket.id);
+    if (participant.sockets.size === 0) {
+      room.participants = room.participants.filter((p) => p !== participant);
+    }
     socket.leave(roomCode);
     currentRoom = null;
     io.to(roomCode).emit("room-update", getRoomState(roomCode));
@@ -210,9 +208,9 @@ io.on("connection", (socket) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
     if (!room) return;
-    const participant = room.participants.find((p) => p.id === socket.id);
+    const participant = findBySocket(room.participants, socket.id);
     if (!participant) return;
-    participant.disconnected = true;
+    participant.sockets.delete(socket.id);
     io.to(currentRoom).emit("room-update", getRoomState(currentRoom));
   });
 });

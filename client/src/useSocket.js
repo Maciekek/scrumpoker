@@ -28,11 +28,10 @@ export function useSocket() {
         }
         return state;
       });
+    });
 
-      const me = state.participants.find((p) => p.id === socket.id);
-      if (me && !me.hasVoted) {
-        setSelectedVote(null);
-      }
+    socket.on("sync-vote", (value) => {
+      setSelectedVote(value);
     });
 
     socket.on("kicked", () => {
@@ -146,7 +145,7 @@ export function useSocket() {
   }, [roomCode, emit]);
 
   const kick = useCallback(
-    (participantId) => emit("kick", { roomCode, participantId }),
+    (participantName) => emit("kick", { roomCode, participantName }),
     [roomCode, emit]
   );
 
@@ -174,7 +173,7 @@ export function useSocket() {
   );
 
   const myParticipant = roomState?.participants.find(
-    (p) => p.id === socketRef.current?.id
+    (p) => p.sockets?.includes(socketRef.current?.id)
   );
 
   return {

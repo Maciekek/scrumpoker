@@ -28,7 +28,6 @@ export default function App() {
       selectedVote={s.selectedVote}
       isAdmin={s.isAdmin}
       isSpectator={s.isSpectator}
-      myId={s.myParticipant?.id}
       onVote={s.vote}
       onReveal={s.reveal}
       onReset={s.reset}

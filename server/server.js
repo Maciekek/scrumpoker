@@ -62,7 +62,6 @@ function getRoomState(roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return null;
   const participants = room.participants
-    .filter((p) => p.sockets.size > 0)
     .map((p) => ({
       sockets: [...p.sockets],
       name: p.name,

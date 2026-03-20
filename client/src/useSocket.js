@@ -2,6 +2,22 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { createSocket, getRoomCodeFromURL } from "./socket";
 import { useTranslation } from "./i18n";
 
+const ROOM_ADJECTIVES = [
+  "happy", "quick", "brave", "mellow", "witty", "lucky",
+  "cosmic", "fancy", "swift", "sunny", "calm", "bright",
+];
+
+const ROOM_NOUNS = [
+  "panda", "otter", "waffle", "rocket", "wizard", "tiger",
+  "falcon", "kiwi", "robot", "nugget", "dolphin", "badger",
+];
+
+function generateLocalRoomName() {
+  const adj = ROOM_ADJECTIVES[Math.floor(Math.random() * ROOM_ADJECTIVES.length)];
+  const noun = ROOM_NOUNS[Math.floor(Math.random() * ROOM_NOUNS.length)];
+  return `${adj}-${noun}`;
+}
+
 export function useSocket() {
   const { t } = useTranslation();
   const [screen, setScreen] = useState("lobby");
@@ -64,10 +80,11 @@ export function useSocket() {
   );
 
   const suggestRoomName = useCallback(() => {
-    emit("suggest-room-name", {}, (res) => {
+    setRoomNameInput((prev) => prev || generateLocalRoomName());
+    socketRef.current?.emit("suggest-room-name", (res) => {
       if (res?.name) setRoomNameInput(res.name);
     });
-  }, [emit]);
+  }, []);
 
   useEffect(() => {
     if (!isConnected || joinCode || roomNameInput) return;

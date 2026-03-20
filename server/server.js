@@ -82,7 +82,10 @@ function getRoomState(roomCode) {
 io.on("connection", (socket) => {
   let currentRoom = null;
 
-  socket.on("suggest-room-name", (callback) => {
+  socket.on("suggest-room-name", (payloadOrCallback, maybeCallback) => {
+    const callback = typeof payloadOrCallback === "function"
+      ? payloadOrCallback
+      : maybeCallback;
     if (typeof callback === "function") {
       callback({ name: generateRoomName() });
     }

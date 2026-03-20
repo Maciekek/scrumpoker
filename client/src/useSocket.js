@@ -60,15 +60,6 @@ export function useSocket() {
             if (res.vote != null) setSelectedVote(res.vote);
           }
         });
-      } else {
-        socket.emit("create-room", { userName: savedName }, (res) => {
-          if (res.success) {
-            setRoomCode(res.roomCode);
-            setRole(res.role);
-            setScreen("room");
-            window.history.replaceState({}, "", `/${res.roomCode}`);
-          }
-        });
       }
     });
 

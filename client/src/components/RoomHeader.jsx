@@ -57,6 +57,8 @@ export default function RoomHeader({
         onToggleAdmin={onToggleAdmin}
         onToggleSpectator={onToggleSpectator}
         onLeave={onLeave}
+        onCopyLink={handleCopyLink}
+        onShowQR={() => setShowQR(true)}
       />
     </div>
   );

@@ -294,6 +294,10 @@ body {
   background: #f9fafb;
 }
 
+.mobile-only {
+  display: none;
+}
+
 .menu-item--danger {
   color: #ef4444;
 }
@@ -588,4 +592,20 @@ body {
   color: #6b7280;
   word-break: break-all;
   text-align: center;
+}
+
+@media (max-width: 640px) {
+  .room-header-actions {
+    display: none;
+  }
+
+  .room-meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-only {
+    display: block;
+  }
 }

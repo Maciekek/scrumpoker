@@ -10,6 +10,8 @@ export default function AvatarMenu({
   onToggleAdmin,
   onToggleSpectator,
   onLeave,
+  onCopyLink,
+  onShowQR,
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -87,6 +89,28 @@ export default function AvatarMenu({
               >
                 {t("changeName")}
               </button>
+              {onCopyLink && (
+                <button
+                  className="menu-item mobile-only"
+                  onClick={() => {
+                    setOpen(false);
+                    onCopyLink();
+                  }}
+                >
+                  {t("copyLink")}
+                </button>
+              )}
+              {onShowQR && (
+                <button
+                  className="menu-item mobile-only"
+                  onClick={() => {
+                    setOpen(false);
+                    onShowQR();
+                  }}
+                >
+                  {t("qrCode")}
+                </button>
+              )}
               <Toggle
                 on={isAdmin}
                 label={t("adminToggle")}

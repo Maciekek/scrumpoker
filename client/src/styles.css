@@ -395,6 +395,14 @@ body {
   color: #fff;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .vote-card:hover:not(.vote-card--selected) {
+    border-color: #cbd5e1;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+  }
+}
+
 /* ── Results ── */
 
 .results-panel {
@@ -469,13 +477,13 @@ body {
   background: #f9fafb;
 }
 
-.participant--disconnected {
-  opacity: 0.55;
-}
-
 .participant-name {
   font-weight: 500;
   color: #374151;
+}
+
+.participant-name--disconnected {
+  color: #9ca3af;
 }
 
 .badge {

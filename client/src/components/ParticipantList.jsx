@@ -18,13 +18,13 @@ export default function ParticipantList({
         {participants.map((p) => (
           <li
             key={p.name}
-            className={`participant ${p.name === myName ? "participant--me" : ""} ${p.connected === false ? "participant--disconnected" : ""}`}
+            className={`participant ${p.name === myName ? "participant--me" : ""}`}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <span
                 className={`status-dot ${p.hasVoted ? "status-dot--voted" : "status-dot--pending"}`}
               />
-              <span className="participant-name">{p.name}</span>
+              <span className={`participant-name ${p.connected === false ? "participant-name--disconnected" : ""}`}>{p.name}</span>
               {p.isAdmin && <span className="badge badge--admin">{t("admin")}</span>}
               {p.role === "spectator" && (
                 <span className="badge badge--spectator">{t("spectatorBadge")}</span>

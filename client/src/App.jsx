@@ -17,7 +17,6 @@ export default function App() {
         onCreate={s.createRoom}
         error={s.error}
         kickedMessage={s.kickedMessage}
-        connectionState={s.connectionState}
         roomNameInput={s.roomNameInput}
         onRoomNameChange={s.setRoomNameInput}
         onSuggestRoomName={s.suggestRoomName}

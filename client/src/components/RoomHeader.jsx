@@ -28,21 +28,25 @@ export default function RoomHeader({
 
   return (
     <div className="room-header">
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span className="room-code">{roomCode}</span>
-        <div className={`connection-chip connection-chip--${connectionState || "connecting"}`}>
-          <span className="connection-dot" />
-          <span>{t(`ws${(connectionState || "connecting").replace(/^./, (c) => c.toUpperCase())}`)}</span>
+      <div className="room-header-left">
+        <div className="room-meta">
+          <span className="room-code">{roomCode}</span>
+          <div className={`connection-chip connection-chip--${connectionState || "connecting"}`}>
+            <span className="connection-dot" />
+            <span>{t(`ws${(connectionState || "connecting").replace(/^./, (c) => c.toUpperCase())}`)}</span>
+          </div>
         </div>
-        <button
-          className={`btn-small ${linkCopied ? "link-copied" : ""}`}
-          onClick={handleCopyLink}
-        >
-          {linkCopied ? t("copied") : t("copyLink")}
-        </button>
-        <button className="btn-small" onClick={() => setShowQR(true)}>
-          {t("qrCode")}
-        </button>
+        <div className="room-header-actions">
+          <button
+            className={`btn-small ${linkCopied ? "link-copied" : ""}`}
+            onClick={handleCopyLink}
+          >
+            {linkCopied ? t("copied") : t("copyLink")}
+          </button>
+          <button className="btn-small" onClick={() => setShowQR(true)}>
+            {t("qrCode")}
+          </button>
+        </div>
       </div>
       {showQR && <QRModal onClose={() => setShowQR(false)} />}
       <AvatarMenu

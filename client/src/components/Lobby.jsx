@@ -10,7 +10,6 @@ export default function Lobby({
   onCreate,
   error,
   kickedMessage,
-  connectionState,
   roomNameInput,
   onRoomNameChange,
   onSuggestRoomName,
@@ -28,10 +27,6 @@ export default function Lobby({
     <div className="app">
       <h1 className="heading">Scrum Poker</h1>
       <div className="lobby-card">
-        <div className={`connection-chip connection-chip--${connectionState || "connecting"}`}>
-          <span className="connection-dot" />
-          <span>{t(`ws${(connectionState || "connecting").replace(/^./, (c) => c.toUpperCase())}`)}</span>
-        </div>
         {kickedMessage && <div className="alert">{kickedMessage}</div>}
         {error && <div className="alert">{error}</div>}
         {hasInviteCode && (

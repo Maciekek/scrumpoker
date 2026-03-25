@@ -20,10 +20,9 @@ function generateLocalRoomName() {
 
 export function useSocket() {
   const { t } = useTranslation();
+  const initialStoredNameRef = useRef(localStorage.getItem("scrumpoker_name") || "");
   const [screen, setScreen] = useState("lobby");
-  const [userName, setUserName] = useState(
-    () => localStorage.getItem("scrumpoker_name") || ""
-  );
+  const [userName, setUserName] = useState(initialStoredNameRef.current);
   const [joinCode, setJoinCode] = useState(getRoomCodeFromURL);
   const [roomCode, setRoomCode] = useState("");
   const [role, setRole] = useState("");
@@ -34,6 +33,7 @@ export function useSocket() {
   const [kickedMessage, setKickedMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [connectionState, setConnectionState] = useState("connecting");
+  const autoJoinKeyRef = useRef("");
   const rejoinSocketIdRef = useRef("");
   const socketRef = useRef(null);
 
@@ -138,6 +138,20 @@ export function useSocket() {
       }
     });
   }, [userName, joinCode, emit]);
+
+  useEffect(() => {
+    if (!isConnected || screen !== "lobby") return;
+    if (!initialStoredNameRef.current.trim()) return;
+
+    const name = userName.trim();
+    const code = joinCode.trim();
+    if (!name || !code) return;
+
+    const key = `${code}::${name}`;
+    if (autoJoinKeyRef.current === key) return;
+    autoJoinKeyRef.current = key;
+    joinRoom();
+  }, [isConnected, screen, userName, joinCode, joinRoom]);
 
   useEffect(() => {
     if (!isConnected || screen !== "room" || !roomCode || !userName.trim()) return;

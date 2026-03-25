@@ -13,6 +13,7 @@ export default function RoomHeader({
   onToggleAdmin,
   onToggleSpectator,
   onLeave,
+  connectionState,
 }) {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -29,6 +30,10 @@ export default function RoomHeader({
     <div className="room-header">
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span className="room-code">{roomCode}</span>
+        <div className={`connection-chip connection-chip--${connectionState || "connecting"}`}>
+          <span className="connection-dot" />
+          <span>{t(`ws${(connectionState || "connecting").replace(/^./, (c) => c.toUpperCase())}`)}</span>
+        </div>
         <button
           className={`btn-small ${linkCopied ? "link-copied" : ""}`}
           onClick={handleCopyLink}

@@ -187,6 +187,37 @@ body {
   font-weight: 700;
 }
 
+.connection-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
+  padding: 3px 9px;
+}
+
+.connection-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+
+.connection-chip--connecting .connection-dot {
+  background: #f59e0b;
+}
+
+.connection-chip--connected .connection-dot {
+  background: #10b981;
+}
+
+.connection-chip--disconnected .connection-dot {
+  background: #ef4444;
+}
+
 /* ── Avatar & Menu ── */
 
 .avatar {

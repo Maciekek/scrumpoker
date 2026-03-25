@@ -17,6 +17,7 @@ export default function App() {
         onCreate={s.createRoom}
         error={s.error}
         kickedMessage={s.kickedMessage}
+        connectionState={s.connectionState}
         roomNameInput={s.roomNameInput}
         onRoomNameChange={s.setRoomNameInput}
         onSuggestRoomName={s.suggestRoomName}
@@ -40,6 +41,7 @@ export default function App() {
       onToggleAdmin={s.toggleAdmin}
       onToggleSpectator={s.toggleSpectator}
       onLeave={s.leaveRoom}
+      connectionState={s.connectionState}
     />
   );
 }

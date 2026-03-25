@@ -32,6 +32,9 @@ const translations = {
     qrCode: "QR",
     scanToJoin: "Scan to join",
     roomName: "Room name",
+    wsConnecting: "Connecting",
+    wsConnected: "Connected",
+    wsDisconnected: "Disconnected",
   },
   pl: {
     yourName: "Twoje imię",
@@ -68,6 +71,9 @@ const translations = {
     qrCode: "QR",
     scanToJoin: "Zeskanuj, aby dołączyć",
     roomName: "Nazwa pokoju",
+    wsConnecting: "Łączenie",
+    wsConnected: "Połączono",
+    wsDisconnected: "Rozłączono",
   },
 };
 

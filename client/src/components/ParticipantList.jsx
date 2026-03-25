@@ -18,7 +18,7 @@ export default function ParticipantList({
         {participants.map((p) => (
           <li
             key={p.name}
-            className={`participant ${p.name === myName ? "participant--me" : ""}`}
+            className={`participant ${p.name === myName ? "participant--me" : ""} ${p.connected === false ? "participant--disconnected" : ""}`}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <span

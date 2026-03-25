@@ -64,6 +64,7 @@ function getRoomState(roomCode) {
   const participants = room.participants
     .map((p) => ({
       sockets: [...p.sockets],
+      connected: p.sockets.size > 0,
       name: p.name,
       role: p.role,
       isAdmin: isAdmin(p),

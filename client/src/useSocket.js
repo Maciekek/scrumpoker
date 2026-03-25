@@ -12,6 +12,8 @@ const ROOM_NOUNS = [
   "falcon", "kiwi", "robot", "nugget", "dolphin", "badger",
 ];
 
+const DISCONNECTED_STATE_DELAY_MS = 1500;
+
 function generateLocalRoomName() {
   const adj = ROOM_ADJECTIVES[Math.floor(Math.random() * ROOM_ADJECTIVES.length)];
   const noun = ROOM_NOUNS[Math.floor(Math.random() * ROOM_NOUNS.length)];
@@ -34,6 +36,7 @@ export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionState, setConnectionState] = useState("connecting");
   const autoJoinKeyRef = useRef("");
+  const disconnectedTimerRef = useRef(null);
   const rejoinSocketIdRef = useRef("");
   const socketRef = useRef(null);
 
@@ -65,22 +68,45 @@ export function useSocket() {
       window.history.replaceState({}, "", "/");
     });
 
+    const clearDisconnectedTimer = () => {
+      if (!disconnectedTimerRef.current) return;
+      clearTimeout(disconnectedTimerRef.current);
+      disconnectedTimerRef.current = null;
+    };
+
+    const setConnectingWithFallback = () => {
+      clearDisconnectedTimer();
+      setConnectionState("connecting");
+      disconnectedTimerRef.current = setTimeout(() => {
+        setConnectionState("disconnected");
+      }, DISCONNECTED_STATE_DELAY_MS);
+    };
+
     socket.on("connect", () => {
+      clearDisconnectedTimer();
       setIsConnected(true);
       setConnectionState("connected");
     });
 
     socket.on("disconnect", () => {
       setIsConnected(false);
-      setConnectionState("disconnected");
+      setConnectingWithFallback();
     });
 
     socket.on("connect_error", () => {
       setIsConnected(false);
-      setConnectionState("connecting");
+      setConnectingWithFallback();
     });
 
-    return () => socket.disconnect();
+    socket.io.on("reconnect_attempt", setConnectingWithFallback);
+    socket.io.on("reconnect_error", setConnectingWithFallback);
+
+    return () => {
+      clearDisconnectedTimer();
+      socket.io.off("reconnect_attempt", setConnectingWithFallback);
+      socket.io.off("reconnect_error", setConnectingWithFallback);
+      socket.disconnect();
+    };
   }, []);
 
   const emit = useCallback(

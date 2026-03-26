@@ -36,6 +36,7 @@ const translations = {
     wsConnecting: "Connecting",
     wsConnected: "Connected",
     wsDisconnected: "Disconnected",
+    restoringSession: "Restoring room session...",
   },
   pl: {
     yourName: "Twoje imię",
@@ -76,6 +77,7 @@ const translations = {
     wsConnecting: "Łączenie",
     wsConnected: "Połączono",
     wsDisconnected: "Rozłączono",
+    restoringSession: "Przywracanie sesji pokoju...",
   },
 };
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSocket } from "./useSocket";
+import { useTranslation } from "./i18n";
 import Lobby from "./components/Lobby";
 import Room from "./components/Room";
 import "./styles.css";
@@ -21,6 +22,7 @@ function getInitialTheme() {
 
 export default function App() {
   const s = useSocket();
+  const { t } = useTranslation();
   const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
@@ -39,6 +41,18 @@ export default function App() {
   const handleToggleTheme = useCallback(() => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);
+
+  if (s.screen === "lobby" && s.isBootstrapping) {
+    return (
+      <div className="app boot-screen">
+        <div className="boot-loader" />
+        <div className="boot-title">{t("restoringSession")}</div>
+        <div className="boot-status">
+          {t(`ws${(s.connectionState || "connecting").replace(/^./, (c) => c.toUpperCase())}`)}
+        </div>
+      </div>
+    );
+  }
 
   if (s.screen === "lobby") {
     return (

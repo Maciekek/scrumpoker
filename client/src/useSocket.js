@@ -21,9 +21,10 @@ function generateLocalRoomName() {
 export function useSocket() {
   const { t } = useTranslation();
   const initialStoredNameRef = useRef(localStorage.getItem("scrumpoker_name") || "");
+  const initialJoinCodeRef = useRef(getRoomCodeFromURL());
   const [screen, setScreen] = useState("lobby");
   const [userName, setUserName] = useState(initialStoredNameRef.current);
-  const [joinCode, setJoinCode] = useState(getRoomCodeFromURL);
+  const [joinCode, setJoinCode] = useState(initialJoinCodeRef.current);
   const [roomCode, setRoomCode] = useState("");
   const [role, setRole] = useState("");
   const [roomState, setRoomState] = useState(null);
@@ -33,6 +34,9 @@ export function useSocket() {
   const [kickedMessage, setKickedMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [connectionState, setConnectionState] = useState("connecting");
+  const [isBootstrapping, setIsBootstrapping] = useState(
+    Boolean(initialStoredNameRef.current.trim() && initialJoinCodeRef.current.trim())
+  );
   const autoJoinKeyRef = useRef("");
   const rejoinSocketIdRef = useRef("");
   const socketRef = useRef(null);
@@ -56,6 +60,7 @@ export function useSocket() {
 
     socket.on("kicked", () => {
       setScreen("lobby");
+      setIsBootstrapping(false);
       setRoomCode("");
       setRole("");
       setRoomState(null);
@@ -133,6 +138,7 @@ export function useSocket() {
         setRoomCode(res.roomCode);
         setRole(res.role);
         setScreen("room");
+        setIsBootstrapping(false);
         window.history.replaceState({}, "", `/${res.roomCode}`);
       } else {
         setError(res.error);
@@ -140,14 +146,24 @@ export function useSocket() {
     });
   }, [userName, roomNameInput, emit]);
 
-  const joinRoom = useCallback(() => {
+  const joinRoom = useCallback((options = {}) => {
+    const isAutoJoin = Boolean(options.autoJoin);
     const name = userName.trim();
-    if (!name) { setError(t("enterYourName")); return; }
-    if (!joinCode.trim()) { setError(t("enterRoomCode")); return; }
+    if (!name) {
+      if (isAutoJoin) setIsBootstrapping(false);
+      setError(t("enterYourName"));
+      return;
+    }
+    if (!joinCode.trim()) {
+      if (isAutoJoin) setIsBootstrapping(false);
+      setError(t("enterRoomCode"));
+      return;
+    }
     setError("");
     setKickedMessage("");
     localStorage.setItem("scrumpoker_name", name);
     emit("join-room", { roomCode: joinCode.trim(), userName: name }, (res) => {
+      setIsBootstrapping(false);
       if (res.success) {
         setRoomCode(res.roomCode);
         setRole(res.role);
@@ -161,17 +177,24 @@ export function useSocket() {
   }, [userName, joinCode, emit]);
 
   useEffect(() => {
-    if (!isConnected || screen !== "lobby") return;
-    if (!initialStoredNameRef.current.trim()) return;
+    if (screen !== "lobby") return;
+    if (!initialStoredNameRef.current.trim()) {
+      setIsBootstrapping(false);
+      return;
+    }
 
     const name = userName.trim();
     const code = joinCode.trim();
-    if (!name || !code) return;
+    if (!name || !code) {
+      setIsBootstrapping(false);
+      return;
+    }
+    if (!isConnected) return;
 
     const key = `${code}::${name}`;
     if (autoJoinKeyRef.current === key) return;
     autoJoinKeyRef.current = key;
-    joinRoom();
+    joinRoom({ autoJoin: true });
   }, [isConnected, screen, userName, joinCode, joinRoom]);
 
   useEffect(() => {
@@ -237,6 +260,7 @@ export function useSocket() {
   const leaveRoom = useCallback(() => {
     emit("leave-room", { roomCode });
     setScreen("lobby");
+    setIsBootstrapping(false);
     setRoomCode("");
     setRole("");
     setRoomState(null);
@@ -272,6 +296,7 @@ export function useSocket() {
     selectedVote,
     error,
     kickedMessage,
+    isBootstrapping,
     myParticipant,
     isAdmin: myParticipant?.isAdmin || false,
     isSpectator: myParticipant?.role === "spectator",

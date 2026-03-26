@@ -22,6 +22,8 @@ export default function Room({
   onToggleSpectator,
   onLeave,
   connectionState,
+  theme,
+  onToggleTheme,
 }) {
   const prevRevealedRef = useRef(false);
   const { t } = useTranslation();
@@ -57,6 +59,8 @@ export default function Room({
         onToggleSpectator={onToggleSpectator}
         onLeave={onLeave}
         connectionState={connectionState}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
       />
 
       <div className="two-columns">

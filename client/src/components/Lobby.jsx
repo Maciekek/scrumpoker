@@ -30,14 +30,9 @@ export default function Lobby({
         {kickedMessage && <div className="alert">{kickedMessage}</div>}
         {error && <div className="alert">{error}</div>}
         {hasInviteCode && (
-          <div style={{
-            textAlign: "center",
-            marginBottom: 16,
-            fontSize: 14,
-            color: "#6b7280",
-          }}>
+          <div className="join-hint">
             {t("joiningRoom")}{" "}
-            <strong style={{ color: "#111827" }}>{joinCode}</strong>
+            <strong className="join-code">{joinCode}</strong>
           </div>
         )}
         <label className="input-label" htmlFor="user-name-input">

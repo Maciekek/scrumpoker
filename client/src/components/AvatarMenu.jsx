@@ -12,6 +12,8 @@ export default function AvatarMenu({
   onLeave,
   onCopyLink,
   onShowQR,
+  theme,
+  onToggleTheme,
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -120,6 +122,11 @@ export default function AvatarMenu({
                 on={isSpectator}
                 label={t("spectator")}
                 onClick={onToggleSpectator}
+              />
+              <Toggle
+                on={theme === "dark"}
+                label={t("darkMode")}
+                onClick={onToggleTheme}
               />
               <button
                 className="menu-item menu-item--danger"

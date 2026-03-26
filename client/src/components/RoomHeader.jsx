@@ -14,6 +14,8 @@ export default function RoomHeader({
   onToggleSpectator,
   onLeave,
   connectionState,
+  theme,
+  onToggleTheme,
 }) {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -59,6 +61,8 @@ export default function RoomHeader({
         onLeave={onLeave}
         onCopyLink={handleCopyLink}
         onShowQR={() => setShowQR(true)}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
       />
     </div>
   );

@@ -4,6 +4,7 @@ const path = require("path");
 const { Server } = require("socket.io");
 
 const app = express();
+app.use(express.json());
 
 const DIST = path.join(__dirname, "..", "client", "dist");
 app.use(express.static(DIST));
@@ -78,6 +79,58 @@ function getRoomState(roomCode) {
     revealed: room.revealed,
   };
 }
+
+function applyVote(roomCode, participant, value) {
+  const room = rooms.get(roomCode);
+  if (!room || !participant || participant.role === "spectator") return false;
+
+  if (room.revealed && participant.vote !== null && participant.vote !== value) {
+    if (!participant.voteHistory) participant.voteHistory = [];
+    participant.voteHistory.push(participant.vote);
+  }
+
+  participant.vote = value;
+  for (const sid of participant.sockets) {
+    io.to(sid).emit("sync-vote", value);
+  }
+  io.to(roomCode).emit("room-update", getRoomState(roomCode));
+  return true;
+}
+
+app.post("/api/vote", (req, res) => {
+  const rawRoomCode = req.body?.roomCode;
+  const rawUserName = req.body?.userName;
+  const value = Object.prototype.hasOwnProperty.call(req.body || {}, "value")
+    ? req.body.value
+    : null;
+
+  const roomCode = typeof rawRoomCode === "string" ? rawRoomCode.toLowerCase().trim() : "";
+  const userName = typeof rawUserName === "string" ? rawUserName.trim() : "";
+
+  if (!roomCode || !userName) {
+    res.status(400).json({ success: false, error: "Missing roomCode or userName" });
+    return;
+  }
+
+  const room = rooms.get(roomCode);
+  if (!room) {
+    res.status(404).json({ success: false, error: "Room not found" });
+    return;
+  }
+
+  const participant = room.participants.find((p) => p.name === userName);
+  if (!participant) {
+    res.status(404).json({ success: false, error: "Participant not found" });
+    return;
+  }
+  if (participant.role === "spectator") {
+    res.status(403).json({ success: false, error: "Spectators cannot vote" });
+    return;
+  }
+
+  applyVote(roomCode, participant, value);
+  res.json({ success: true });
+});
 
 io.on("connection", (socket) => {
   let currentRoom = null;
@@ -188,16 +241,7 @@ io.on("connection", (socket) => {
     const room = rooms.get(roomCode);
     if (!room) return;
     const participant = findBySocket(room.participants, socket.id);
-    if (!participant || participant.role === "spectator") return;
-    if (room.revealed && participant.vote !== null && participant.vote !== value) {
-      if (!participant.voteHistory) participant.voteHistory = [];
-      participant.voteHistory.push(participant.vote);
-    }
-    participant.vote = value;
-    for (const sid of participant.sockets) {
-      io.to(sid).emit("sync-vote", value);
-    }
-    io.to(roomCode).emit("room-update", getRoomState(roomCode));
+    applyVote(roomCode, participant, value);
   });
 
   socket.on("reveal", ({ roomCode }) => {

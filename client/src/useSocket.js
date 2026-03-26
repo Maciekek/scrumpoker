@@ -12,8 +12,6 @@ const ROOM_NOUNS = [
   "falcon", "kiwi", "robot", "nugget", "dolphin", "badger",
 ];
 
-const DISCONNECTED_STATE_DELAY_MS = 1500;
-
 function generateLocalRoomName() {
   const adj = ROOM_ADJECTIVES[Math.floor(Math.random() * ROOM_ADJECTIVES.length)];
   const noun = ROOM_NOUNS[Math.floor(Math.random() * ROOM_NOUNS.length)];
@@ -36,7 +34,6 @@ export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionState, setConnectionState] = useState("connecting");
   const autoJoinKeyRef = useRef("");
-  const disconnectedTimerRef = useRef(null);
   const rejoinSocketIdRef = useRef("");
   const socketRef = useRef(null);
 
@@ -68,43 +65,41 @@ export function useSocket() {
       window.history.replaceState({}, "", "/");
     });
 
-    const clearDisconnectedTimer = () => {
-      if (!disconnectedTimerRef.current) return;
-      clearTimeout(disconnectedTimerRef.current);
-      disconnectedTimerRef.current = null;
-    };
-
-    const setConnectingWithFallback = () => {
-      clearDisconnectedTimer();
-      setConnectionState("connecting");
-      disconnectedTimerRef.current = setTimeout(() => {
-        setConnectionState("disconnected");
-      }, DISCONNECTED_STATE_DELAY_MS);
-    };
-
     socket.on("connect", () => {
-      clearDisconnectedTimer();
       setIsConnected(true);
       setConnectionState("connected");
     });
 
     socket.on("disconnect", () => {
       setIsConnected(false);
-      setConnectingWithFallback();
+      setConnectionState("disconnected");
     });
 
     socket.on("connect_error", () => {
       setIsConnected(false);
-      setConnectingWithFallback();
+      setConnectionState("disconnected");
     });
 
-    socket.io.on("reconnect_attempt", setConnectingWithFallback);
-    socket.io.on("reconnect_error", setConnectingWithFallback);
+    const handleReconnectAttempt = () => setConnectionState("connecting");
+    const handleReconnectError = () => setConnectionState("disconnected");
+    const handleReconnectFailed = () => setConnectionState("disconnected");
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      if (socket.connected) return;
+      setConnectionState("connecting");
+      socket.connect();
+    };
+
+    socket.io.on("reconnect_attempt", handleReconnectAttempt);
+    socket.io.on("reconnect_error", handleReconnectError);
+    socket.io.on("reconnect_failed", handleReconnectFailed);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      clearDisconnectedTimer();
-      socket.io.off("reconnect_attempt", setConnectingWithFallback);
-      socket.io.off("reconnect_error", setConnectingWithFallback);
+      socket.io.off("reconnect_attempt", handleReconnectAttempt);
+      socket.io.off("reconnect_error", handleReconnectError);
+      socket.io.off("reconnect_failed", handleReconnectFailed);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       socket.disconnect();
     };
   }, []);
@@ -198,10 +193,20 @@ export function useSocket() {
 
   const vote = useCallback(
     (value) => {
+      const trimmedUserName = userName.trim();
+      if (!roomCode || !trimmedUserName) return;
       setSelectedVote(value);
-      emit("vote", { roomCode, value });
+      fetch("/api/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roomCode, userName: trimmedUserName, value }),
+      }).catch(() => {
+        // Keep optimistic value locally; room state will sync on next update.
+      });
     },
-    [roomCode, emit]
+    [roomCode, userName]
   );
 
   const reveal = useCallback(() => emit("reveal", { roomCode }), [roomCode, emit]);

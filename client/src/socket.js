@@ -5,7 +5,8 @@ export function createSocket() {
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 500,
-    reconnectionDelayMax: 30000,
+    reconnectionDelayMax: 500,
+    randomizationFactor: 0,
   });
 }
 

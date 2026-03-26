@@ -82,11 +82,13 @@ export function useSocket() {
 
     socket.on("connect_error", () => {
       setIsConnected(false);
-      setConnectionState("disconnected");
+      setConnectionState(socket.active ? "connecting" : "disconnected");
     });
 
     const handleReconnectAttempt = () => setConnectionState("connecting");
-    const handleReconnectError = () => setConnectionState("disconnected");
+    const handleReconnectError = () => {
+      setConnectionState(socket.active ? "connecting" : "disconnected");
+    };
     const handleReconnectFailed = () => setConnectionState("disconnected");
     const handleVisibilityChange = () => {
       if (document.visibilityState !== "visible") return;
@@ -218,6 +220,13 @@ export function useSocket() {
     (value) => {
       const trimmedUserName = userName.trim();
       if (!roomCode || !trimmedUserName) return;
+
+      const socket = socketRef.current;
+      if (socket && !socket.connected) {
+        setConnectionState("connecting");
+        socket.connect();
+      }
+
       setSelectedVote(value);
       fetch("/api/vote", {
         method: "POST",
